@@ -10,6 +10,7 @@ defmodule Lofi.Mixfile do
       start_permanent: Mix.env == :prod,
       deps: deps(),
       description: description(),
+      package: package(),
       source_url: "https://github.com/RoyalIcing/lofi-elixir"
     ]
   end
@@ -19,6 +20,7 @@ defmodule Lofi.Mixfile do
   # Type "mix help compile.app" for more information
   def application do
     # Specify extra applications you'll use from Erlang/Elixir
+    []
   end
 
   # Dependencies can be Hex packages:
@@ -44,7 +46,8 @@ defmodule Lofi.Mixfile do
     [
       name: :lofi,
       maintainers: ["Patrick George Wyndham Smith"],
-      licenses: ["Apache 2.0"]
+      licenses: ["Apache 2.0"],
+      links: %{"GitHub" => "https://github.com/RoyalIcing/lofi-elixir"}
     ]
   end
 end
