@@ -6,9 +6,11 @@ defmodule Lofi.Parse do
   @tags_regex ~r/\B#[A-Za-z0-9_-]+(:\s*[^#]*)?/
   @tag_key_value_regex ~r/\B#([a-zA-Z0-9-_]+)(:\s*([^#]*))?/
   @mentions_regex ~r/@([a-zA-Z0-9_-]+(?:\.[a-zA-Z0-9-_]+)*)/
+  @introduction_regex ~r/^@([a-zA-Z0-9_-]+):/
 
   defp clean_text(input) do
     Regex.replace(@tags_regex, input, "")
+    |> String.trim
   end
 
   defp parse_tag_key_value(input) do
@@ -35,8 +37,23 @@ defmodule Lofi.Parse do
     |> String.split(".")
   end
 
-  defp parse_texts_and_mentions(input) do
-    texts_and_mentions = Regex.split(@mentions_regex, input, include_captures: true)
+  defp parse_introduction(input) do
+    introduction_indexes = Regex.run(@introduction_regex, input, return: :index, include_captures: true)
+    case introduction_indexes do
+      nil ->
+        { nil, input }
+      [_full_range, {start, len}] ->
+        {
+          String.slice(input, start, len),
+          String.slice(input, start+len+1..-1)
+          |> String.trim
+        }
+    end
+  end
+
+  defp parse_texts_and_mentions(input) when is_bitstring(input) do
+    no_tags_input = clean_text(input)
+    texts_and_mentions = Regex.split(@mentions_regex, no_tags_input, include_captures: true)
     process_texts_and_mentions(texts_and_mentions, [], [])
   end
 
@@ -53,7 +70,7 @@ defmodule Lofi.Parse do
   end
 
   defp process_texts_and_mentions([], texts, mentions) do
-    {Enum.reverse(texts), Enum.reverse(mentions)}
+    { Enum.reverse(texts), Enum.reverse(mentions) }
   end
 
   @doc """
@@ -71,12 +88,13 @@ defmodule Lofi.Parse do
       %Lofi.Element{ texts: ["hello ", " "], mentions: [["first-name"], ["last-name"]] }
 
   """
-  def parse_element(raw_string) when is_bitstring(raw_string) do
-    {texts, mentions} = raw_string
-      |> clean_text
+  def parse_element(input) when is_bitstring(input) do
+    {introducing, rest} = input
       |> String.trim
-      |> parse_texts_and_mentions
-    tags = parse_tags(raw_string)
-    %Lofi.Element{ texts: texts, mentions: mentions, tags: tags }
+      |> parse_introduction
+
+    {texts, mentions} = parse_texts_and_mentions(rest)
+    tags = parse_tags(rest)
+    %Lofi.Element{ introducing: introducing, texts: texts, mentions: mentions, tags: tags }
   end
 end

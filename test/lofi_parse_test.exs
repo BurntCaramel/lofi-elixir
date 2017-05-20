@@ -40,4 +40,10 @@ defmodule LofiParseTest do
     assert Parse.parse_element("hello @person.name @person.last #button") == %Element{ texts: ["hello ", " "], mentions: [["person", "name"], ["person", "last"]], tags: %{ "button" => {:flag, true} } }
     assert Parse.parse_element("hello @person.name @person.last #key: value") == %Element{ texts: ["hello ", " "], mentions: [["person", "name"], ["person", "last"]], tags: %{ "key" => {:value, "value"} } }
   end
+
+  test "parse introduction" do
+    assert Parse.parse_element("@user: hello") == %Element{ introducing: "user", texts: ["hello"] }
+    assert Parse.parse_element("@title: #text") == %Element{ introducing: "title", tags: %{ "text" => {:flag, true} } }
+    assert Parse.parse_element("@example: hello #key: value") == %Element{ introducing: "example", texts: ["hello"], tags: %{ "key" => {:value, "value"} } }
+  end
 end
