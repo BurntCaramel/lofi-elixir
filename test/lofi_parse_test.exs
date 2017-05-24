@@ -48,6 +48,8 @@ defmodule LofiParseTest do
 
   test "parse tag text with mentions" do
     assert Parse.parse_element("#table #title: @person.name") == %Element{ texts: [], mentions: [], tags: %{ "table" => {:flag, true}, "title" => {:content, %{ texts: [""], mentions: [["person", "name"]] }} } }
+    assert Parse.parse_element("#table #title: @person.name @person.last") == %Element{ texts: [], mentions: [], tags: %{ "table" => {:flag, true}, "title" => {:content, %{ texts: ["", " "], mentions: [["person", "name"], ["person", "last"]] }} } }
+    assert Parse.parse_element("#table #title: a @person.name b @person.last") == %Element{ texts: [], mentions: [], tags: %{ "table" => {:flag, true}, "title" => {:content, %{ texts: ["a ", " b "], mentions: [["person", "name"], ["person", "last"]] }} } }
     assert Parse.parse_element(" #table #title: @person.name ") == %Element{ texts: [], mentions: [], tags: %{ "table" => {:flag, true}, "title" => {:content, %{ texts: [""], mentions: [["person", "name"]] }} } }
   end
 
