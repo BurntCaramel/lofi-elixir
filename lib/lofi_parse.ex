@@ -18,7 +18,7 @@ defmodule Lofi.Parse do
       [_whole, key] ->
         {key, {:flag, true}}
       [_whole, key, _left, value] ->
-        {key, {:value, String.trim(value)}}
+        {key, {:content, parse_texts_and_mentions(value)}}
     end
   end
 
@@ -70,7 +70,7 @@ defmodule Lofi.Parse do
   end
 
   defp process_texts_and_mentions([], texts, mentions) do
-    { Enum.reverse(texts), Enum.reverse(mentions) }
+    %{ texts: Enum.reverse(texts), mentions: Enum.reverse(mentions) }
   end
 
   @doc """
@@ -93,7 +93,7 @@ defmodule Lofi.Parse do
       |> String.trim
       |> parse_introduction
 
-    {texts, mentions} = parse_texts_and_mentions(rest)
+    %{ texts: texts, mentions: mentions } = parse_texts_and_mentions(rest)
     tags = parse_tags(rest)
     %Lofi.Element{ introducing: introducing, texts: texts, mentions: mentions, tags: tags }
   end
