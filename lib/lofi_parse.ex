@@ -57,6 +57,10 @@ defmodule Lofi.Parse do
     process_texts_and_mentions(texts_and_mentions, [], [])
   end
 
+  defp process_texts_and_mentions([ "" ], [], []) do
+    %{ texts: [""], mentions: [] }
+  end
+
   defp process_texts_and_mentions([ "" ], texts, mentions) do
     process_texts_and_mentions([], texts, mentions)
   end
@@ -96,5 +100,40 @@ defmodule Lofi.Parse do
     %{ texts: texts, mentions: mentions } = parse_texts_and_mentions(rest)
     tags = parse_tags(rest)
     %Lofi.Element{ introducing: introducing, texts: texts, mentions: mentions, tags: tags }
+  end
+
+  defp split_lines(input) do
+    String.split(input, "\n", trim: true)
+  end
+
+  @nested_line_regex ~r/^-[\s]*/
+
+  defp foldl_section_line_input(input, lines) do
+    # If nested item
+    case Regex.split @nested_line_regex, input do
+      [ "" | [ line_input ] ] ->
+        [ parent_element | rest ] = case lines do
+          [] ->
+            [ %Lofi.Element{}, [] ]
+          
+          _ ->
+            lines
+        end
+        nested_element = parse_element(line_input)
+        updated_parent_element = update_in(parent_element.children, fn children -> [ nested_element | children ] end)
+        [ updated_parent_element | rest ]
+      
+      [ line_input ] ->
+        [ parse_element(line_input) | lines ]
+    end
+  end
+
+  def parse_section(input) when is_bitstring(input) do
+    input
+      |> String.trim
+      |> split_lines
+      |> List.foldl([], &foldl_section_line_input/2)
+      |> Enum.map(fn e -> update_in(e.children, &Enum.reverse/1) end)
+      |> Enum.reverse
   end
 end

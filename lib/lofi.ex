@@ -4,6 +4,6 @@ defmodule Lofi do
   """
 
   defmodule Element do
-    defstruct introducing: nil, texts: [], mentions: [], tags: %{}
+    defstruct introducing: nil, texts: [""], mentions: [], tags: %{}, children: []
   end
 end
