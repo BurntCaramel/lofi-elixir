@@ -123,7 +123,7 @@ defmodule Lofi.Parse do
       [ "" | [ line_input ] ] ->
         [ parent_element | rest ] = case lines do
           [] ->
-            [ %Lofi.Element{}, [] ]
+            [ %Lofi.Element{} ]
           
           _ ->
             lines

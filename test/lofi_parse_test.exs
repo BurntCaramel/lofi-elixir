@@ -92,6 +92,12 @@ top
 ) == [ %Element{ texts: ["top"], children: [ %Element{ texts: ["inner1"] }, %Element{ texts: ["inner2"] } ] } ]
 
     assert Parse.parse_section("""
+- inner1
+- inner2
+"""
+) == [ %Element{ texts: [""], children: [ %Element{ texts: ["inner1"] }, %Element{ texts: ["inner2"] } ] } ]
+
+    assert Parse.parse_section("""
 top1
 - inner1
 - inner2
