@@ -102,15 +102,24 @@ defmodule Lofi.Parse do
     %Lofi.Element{ introducing: introducing, texts: texts, mentions: mentions, tags: tags }
   end
 
-  defp split_lines(input) do
-    String.split(input, "\n", trim: true)
-  end
-
+  # Lines are separated by one newline
+  @line_separator_regex ~r/\r\n|\n/
+  # Sections are separated by two newlines
+  @section_separator_regex ~r/(\r\n|\n){2,}/
+  # Nested children have '-' at the start
   @nested_line_regex ~r/^-[\s]*/
 
+  defp split_lines(input) do
+    String.split(input, @line_separator_regex, trim: true)
+  end
+
+  defp split_sections(input) do
+    String.split(input, @section_separator_regex, trim: true)
+  end
+
   defp foldl_section_line_input(input, lines) do
-    # If nested item
     case Regex.split @nested_line_regex, input do
+      # When nested line
       [ "" | [ line_input ] ] ->
         [ parent_element | rest ] = case lines do
           [] ->
@@ -123,6 +132,7 @@ defmodule Lofi.Parse do
         updated_parent_element = update_in(parent_element.children, fn children -> [ nested_element | children ] end)
         [ updated_parent_element | rest ]
       
+      # When normal line
       [ line_input ] ->
         [ parse_element(line_input) | lines ]
     end
@@ -133,7 +143,16 @@ defmodule Lofi.Parse do
       |> String.trim
       |> split_lines
       |> List.foldl([], &foldl_section_line_input/2)
+      # Reverse folded children
       |> Enum.map(fn e -> update_in(e.children, &Enum.reverse/1) end)
+      # Reverse folded lines
       |> Enum.reverse
+  end
+
+  def parse_sections(input) when is_bitstring(input) do
+    input
+      |> String.trim
+      |> split_sections
+      |> Enum.map(&parse_section/1)
   end
 end

@@ -64,6 +64,9 @@ defmodule LofiParseTest do
   end
 
   test "parse section" do
+    assert Parse.parse_section("hello\nis\r\nit\nme\nyou’re\nlooking\r\nfor?")
+    == [ %Element{ texts: ["hello"] }, %Element{ texts: ["is"] }, %Element{ texts: ["it"] }, %Element{ texts: ["me"] }, %Element{ texts: ["you’re"] }, %Element{ texts: ["looking"] }, %Element{ texts: ["for?"] } ]
+
     assert Parse.parse_section("""
 hello
 is
@@ -141,5 +144,67 @@ below #eighth
       %Element{ texts: ["below"], tags: %{ "eighth" => {:flag, true} } }
     ]
 
+  end
+
+  test "parse sections" do
+    assert Parse.parse_sections("""
+Name #field
+Password #field #password
+
+above #first
+top1 #second: 2nd
+- inner1 #third
+- @inner2.and.then.some #fourth
+@top2 #fifth: @mentioning.something
+- inner3 #sixth
+- inner4 #seventh
+below #eighth
+"""
+  ) == [
+      [
+        %Element{ texts: ["Name"], tags: %{ "field" => {:flag, true} } },
+        %Element{ texts: ["Password"], tags: %{ "field" => {:flag, true}, "password" => {:flag, true} } }
+      ],
+      [
+        %Element{ texts: ["above"], tags: %{ "first" => {:flag, true} } },
+        %Element{ texts: ["top1"], tags: %{ "second" => {:content, %{ texts: ["2nd"], mentions: [] }} }, children: [
+          %Element{ texts: ["inner1"], tags: %{ "third" => {:flag, true} } },
+          %Element{ mentions: [["inner2", "and", "then", "some"]], tags: %{ "fourth" => {:flag, true} } }
+        ] },
+        %Element{ mentions: [["top2"]], tags: %{ "fifth" => {:content, %{ texts: [""], mentions: [["mentioning", "something"]] }} }, children: [
+          %Element{ texts: ["inner3"], tags: %{ "sixth" => {:flag, true} } },
+          %Element{ texts: ["inner4"], tags: %{ "seventh" => {:flag, true} } }
+        ] },
+        %Element{ texts: ["below"], tags: %{ "eighth" => {:flag, true} } }
+      ]
+    ]
+
+    assert Parse.parse_sections("""
+Name #field\r\nPassword #field #password\r\n\r\nabove #first
+top1 #second: 2nd\r\n- inner1 #third
+- @inner2.and.then.some #fourth
+@top2 #fifth: @mentioning.something
+- inner3 #sixth
+- inner4 #seventh
+below #eighth
+"""
+  ) == [
+      [
+        %Element{ texts: ["Name"], tags: %{ "field" => {:flag, true} } },
+        %Element{ texts: ["Password"], tags: %{ "field" => {:flag, true}, "password" => {:flag, true} } }
+      ],
+      [
+        %Element{ texts: ["above"], tags: %{ "first" => {:flag, true} } },
+        %Element{ texts: ["top1"], tags: %{ "second" => {:content, %{ texts: ["2nd"], mentions: [] }} }, children: [
+          %Element{ texts: ["inner1"], tags: %{ "third" => {:flag, true} } },
+          %Element{ mentions: [["inner2", "and", "then", "some"]], tags: %{ "fourth" => {:flag, true} } }
+        ] },
+        %Element{ mentions: [["top2"]], tags: %{ "fifth" => {:content, %{ texts: [""], mentions: [["mentioning", "something"]] }} }, children: [
+          %Element{ texts: ["inner3"], tags: %{ "sixth" => {:flag, true} } },
+          %Element{ texts: ["inner4"], tags: %{ "seventh" => {:flag, true} } }
+        ] },
+        %Element{ texts: ["below"], tags: %{ "eighth" => {:flag, true} } }
+      ]
+    ]
   end
 end
