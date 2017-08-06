@@ -126,6 +126,23 @@ below
       %Element{ texts: ["top2"], children: [ %Element{ texts: ["inner3"] }, %Element{ texts: ["inner4"] } ] },
       %Element{ texts: ["below"] }
     ]
+  
+  assert Parse.parse_section("""
+above
+@top1:
+- @inner1: hello
+- @inner2: hello
+top2
+- inner3
+- inner4
+below
+"""
+  ) == [
+      %Element{ texts: ["above"] },
+      %Element{ introducing: "top1", texts: [""], children: [ %Element{ introducing: "inner1", texts: ["hello"] }, %Element{ introducing: "inner2", texts: ["hello"] } ] },
+      %Element{ texts: ["top2"], children: [ %Element{ texts: ["inner3"] }, %Element{ texts: ["inner4"] } ] },
+      %Element{ texts: ["below"] }
+    ]
 
     assert Parse.parse_section("""
 above #first
