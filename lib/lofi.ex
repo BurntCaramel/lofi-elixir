@@ -4,6 +4,9 @@ defmodule Lofi do
   """
 
   defmodule Element do
+    @moduledoc """
+    A Lofi element struct, with texts, mentions, tags, children, and optionally, introducing
+    """
     defstruct introducing: nil, texts: [""], mentions: [], tags: %{}, children: []
   end
 end
