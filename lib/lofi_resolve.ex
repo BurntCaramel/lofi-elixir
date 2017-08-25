@@ -7,7 +7,11 @@ defmodule Lofi.Resolve do
   Resolve string from `texts` and `mentions`, substituting values for any @mentions found by calling `get_mention_value` with the mention key.
   """
   def resolve_content(texts, mentions, get_mention_value) when is_function(get_mention_value) do
-    [texts, mentions]
+    [
+      texts,
+      # Mentions may have one less item than texts, so ensure it matches for .zip
+      mentions ++ [[]]
+    ]
     |> List.zip
     |> Enum.flat_map(fn({text, mention}) -> [text, get_mention_value.(mention)] end)
     |> Enum.join

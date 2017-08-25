@@ -42,4 +42,11 @@ defmodule LofiResolveTest do
       end)
     end
   end
+
+  test "resolve_content with uneven mentions" do
+    texts = ["Welcome!"]
+    mentions = []
+
+    assert Resolve.resolve_content(texts, mentions, %{}, "") == "Welcome!"
+  end
 end
