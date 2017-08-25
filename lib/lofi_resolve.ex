@@ -13,7 +13,12 @@ defmodule Lofi.Resolve do
       mentions ++ [[]]
     ]
     |> List.zip
-    |> Enum.flat_map(fn({text, mention}) -> [text, get_mention_value.(mention)] end)
+    |> Enum.flat_map(fn({text, mention}) ->
+      case mention do
+        [] -> [text]
+        mention -> [text, get_mention_value.(mention)]
+      end
+    end)
     |> Enum.join
   end
 
