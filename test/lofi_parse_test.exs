@@ -12,12 +12,12 @@ defmodule LofiParseTest do
   end
 
   test "parse text with tags" do
-    assert Parse.parse_element("hello #button") == %Element{ texts: ["hello"], tags: %{ "button" => {:flag, true} } }
-    assert Parse.parse_element("hello #variation: danger") == %Element{ texts: ["hello"], tags: %{ "variation" => {:content, %{ texts: ["danger"], mentions: [] }} } }
-    assert Parse.parse_element("hello #button #variation: danger") == %Element{texts: ["hello"], tags: %{ "button" => {:flag, true}, "variation" => {:content, %{ texts: ["danger"], mentions: [] }} } }
-    assert Parse.parse_element("hello #button #variation: danger ") == %Element{texts: ["hello"], tags: %{ "button" => {:flag, true}, "variation" => {:content, %{ texts: ["danger"], mentions: [] }} } }
-    assert Parse.parse_element("hello #variation: danger #button") == %Element{ texts: ["hello"], tags: %{ "button" => {:flag, true}, "variation" => {:content, %{ texts: ["danger"], mentions: [] }} } }
-    assert Parse.parse_element("hello #variation: danger #button ") == %Element{ texts: ["hello"], tags: %{ "button" => {:flag, true}, "variation" => {:content, %{ texts: ["danger"], mentions: [] }} } }
+    assert Parse.parse_element("hello #button") == %Element{ texts: ["hello"], tags_path: ["button"], tags_hash: %{ "button" => {:flag, true} } }
+    assert Parse.parse_element("hello #variation: danger") == %Element{ texts: ["hello"], tags_hash: %{ "variation" => {:content, %{ texts: ["danger"], mentions: [] }} } }
+    assert Parse.parse_element("hello #button #variation: danger") == %Element{texts: ["hello"], tags_path: ["button"], tags_hash: %{ "button" => {:flag, true}, "variation" => {:content, %{ texts: ["danger"], mentions: [] }} } }
+    assert Parse.parse_element("hello #button #variation: danger ") == %Element{texts: ["hello"], tags_path: ["button"], tags_hash: %{ "button" => {:flag, true}, "variation" => {:content, %{ texts: ["danger"], mentions: [] }} } }
+    assert Parse.parse_element("hello #variation: danger #button") == %Element{ texts: ["hello"], tags_path: ["button"], tags_hash: %{ "button" => {:flag, true}, "variation" => {:content, %{ texts: ["danger"], mentions: [] }} } }
+    assert Parse.parse_element("hello #variation: danger #button ") == %Element{ texts: ["hello"], tags_path: ["button"], tags_hash: %{ "button" => {:flag, true}, "variation" => {:content, %{ texts: ["danger"], mentions: [] }} } }
   end
 
   test "parse just mentions" do
@@ -40,27 +40,27 @@ defmodule LofiParseTest do
   end
 
   test "parse text with tags and mentions" do
-    assert Parse.parse_element("hello @person.name #button") == %Element{ texts: ["hello "], mentions: [["person", "name"]], tags: %{ "button" => {:flag, true} } }
-    assert Parse.parse_element("hello @person.name @person.last #button") == %Element{ texts: ["hello ", " "], mentions: [["person", "name"], ["person", "last"]], tags: %{ "button" => {:flag, true} } }
-    assert Parse.parse_element("hello @person.name @person.last #key: value") == %Element{ texts: ["hello ", " "], mentions: [["person", "name"], ["person", "last"]], tags: %{ "key" => {:content, %{ texts: ["value"], mentions: [] }} } }
-    assert Parse.parse_element(" hello @person.name @person.last #key: value ") == %Element{ texts: ["hello ", " "], mentions: [["person", "name"], ["person", "last"]], tags: %{ "key" => {:content, %{ texts: ["value"], mentions: [] }} } }
+    assert Parse.parse_element("hello @person.name #button") == %Element{ texts: ["hello "], mentions: [["person", "name"]], tags_path: ["button"], tags_hash: %{ "button" => {:flag, true} } }
+    assert Parse.parse_element("hello @person.name @person.last #button") == %Element{ texts: ["hello ", " "], mentions: [["person", "name"], ["person", "last"]], tags_path: ["button"], tags_hash: %{ "button" => {:flag, true} } }
+    assert Parse.parse_element("hello @person.name @person.last #key: value") == %Element{ texts: ["hello ", " "], mentions: [["person", "name"], ["person", "last"]], tags_hash: %{ "key" => {:content, %{ texts: ["value"], mentions: [] }} } }
+    assert Parse.parse_element(" hello @person.name @person.last #key: value ") == %Element{ texts: ["hello ", " "], mentions: [["person", "name"], ["person", "last"]], tags_hash: %{ "key" => {:content, %{ texts: ["value"], mentions: [] }} } }
   end
 
   test "parse tag value with mentions" do
-    assert Parse.parse_element("#table #title: @person.name") == %Element{ tags: %{ "table" => {:flag, true}, "title" => {:content, %{ texts: [""], mentions: [["person", "name"]] }} } }
-    assert Parse.parse_element("#table #title: @person.name @person.last") == %Element{ tags: %{ "table" => {:flag, true}, "title" => {:content, %{ texts: ["", " "], mentions: [["person", "name"], ["person", "last"]] }} } }
-    assert Parse.parse_element("#table #title: a @person.name b @person.last") == %Element{ tags: %{ "table" => {:flag, true}, "title" => {:content, %{ texts: ["a ", " b "], mentions: [["person", "name"], ["person", "last"]] }} } }
-    assert Parse.parse_element(" #table #title: @person.name ") == %Element{ tags: %{ "table" => {:flag, true}, "title" => {:content, %{ texts: [""], mentions: [["person", "name"]] }} } }
+    assert Parse.parse_element("#table #title: @person.name") == %Element{ tags_path: ["table"], tags_hash: %{ "table" => {:flag, true}, "title" => {:content, %{ texts: [""], mentions: [["person", "name"]] }} } }
+    assert Parse.parse_element("#table #title: @person.name @person.last") == %Element{ tags_path: ["table"], tags_hash: %{ "table" => {:flag, true}, "title" => {:content, %{ texts: ["", " "], mentions: [["person", "name"], ["person", "last"]] }} } }
+    assert Parse.parse_element("#table #title: a @person.name b @person.last") == %Element{ tags_path: ["table"], tags_hash: %{ "table" => {:flag, true}, "title" => {:content, %{ texts: ["a ", " b "], mentions: [["person", "name"], ["person", "last"]] }} } }
+    assert Parse.parse_element(" #table #title: @person.name ") == %Element{ tags_path: ["table"], tags_hash: %{ "table" => {:flag, true}, "title" => {:content, %{ texts: [""], mentions: [["person", "name"]] }} } }
   end
 
   test "parse introduction" do
     assert Parse.parse_element("@user: hello") == %Element{ introducing: "user", texts: ["hello"] }
     assert Parse.parse_element("@user:") == %Element{ introducing: "user", texts: [""] }
     assert Parse.parse_element("@user: ") == %Element{ introducing: "user", texts: [""] }
-    assert Parse.parse_element("@title: #text") == %Element{ introducing: "title", tags: %{ "text" => {:flag, true} } }
+    assert Parse.parse_element("@title: #text") == %Element{ introducing: "title", tags_path: ["text"], tags_hash: %{ "text" => {:flag, true} } }
     assert Parse.parse_element("@example: @person.name") == %Element{ introducing: "example", texts: [""], mentions: [["person", "name"]] }
-    assert Parse.parse_element("@example: hello #key: value") == %Element{ introducing: "example", texts: ["hello"], tags: %{ "key" => {:content, %{ texts: ["value"], mentions: [] } } } }
-    assert Parse.parse_element(" @example: hello #key: value") == %Element{ introducing: "example", texts: ["hello"], tags: %{ "key" => {:content, %{ texts: ["value"], mentions: [] } } } }
+    assert Parse.parse_element("@example: hello #key: value") == %Element{ introducing: "example", texts: ["hello"], tags_hash: %{ "key" => {:content, %{ texts: ["value"], mentions: [] } } } }
+    assert Parse.parse_element(" @example: hello #key: value") == %Element{ introducing: "example", texts: ["hello"], tags_hash: %{ "key" => {:content, %{ texts: ["value"], mentions: [] } } } }
   end
 
   test "parse section" do
@@ -155,16 +155,16 @@ top1 #second: 2nd
 below #eighth
 """
   ) == [
-      %Element{ texts: ["above"], tags: %{ "first" => {:flag, true} } },
-      %Element{ texts: ["top1"], tags: %{ "second" => {:content, %{ texts: ["2nd"], mentions: [] }} }, children: [
-        %Element{ texts: ["inner1"], tags: %{ "third" => {:flag, true} } },
-        %Element{ mentions: [["inner2", "and", "then", "some"]], tags: %{ "fourth" => {:flag, true} } }
+      %Element{ texts: ["above"], tags_path: ["first"], tags_hash: %{ "first" => {:flag, true} } },
+      %Element{ texts: ["top1"], tags_hash: %{ "second" => {:content, %{ texts: ["2nd"], mentions: [] }} }, children: [
+        %Element{ texts: ["inner1"], tags_path: ["third"], tags_hash: %{ "third" => {:flag, true} } },
+        %Element{ mentions: [["inner2", "and", "then", "some"]], tags_path: ["fourth"], tags_hash: %{ "fourth" => {:flag, true} } }
       ] },
-      %Element{ mentions: [["top2"]], tags: %{ "fifth" => {:content, %{ texts: [""], mentions: [["mentioning", "something"]] }} }, children: [
-        %Element{ texts: ["inner3"], tags: %{ "sixth" => {:flag, true} } },
-        %Element{ texts: ["inner4"], tags: %{ "seventh" => {:flag, true} } }
+      %Element{ mentions: [["top2"]], tags_hash: %{ "fifth" => {:content, %{ texts: [""], mentions: [["mentioning", "something"]] }} }, children: [
+        %Element{ texts: ["inner3"], tags_path: ["sixth"], tags_hash: %{ "sixth" => {:flag, true} } },
+        %Element{ texts: ["inner4"], tags_path: ["seventh"], tags_hash: %{ "seventh" => {:flag, true} } }
       ] },
-      %Element{ texts: ["below"], tags: %{ "eighth" => {:flag, true} } }
+      %Element{ texts: ["below"], tags_path: ["eighth"], tags_hash: %{ "eighth" => {:flag, true} } }
     ]
 
   end
@@ -185,20 +185,20 @@ below #eighth
 """
   ) == [
       [
-        %Element{ texts: ["Name"], tags: %{ "field" => {:flag, true} } },
-        %Element{ texts: ["Password"], tags: %{ "field" => {:flag, true}, "password" => {:flag, true} } }
+        %Element{ texts: ["Name"], tags_path: ["field"], tags_hash: %{ "field" => {:flag, true} } },
+        %Element{ texts: ["Password"], tags_path: ["field", "password"], tags_hash: %{ "field" => {:flag, true}, "password" => {:flag, true} } }
       ],
       [
-        %Element{ texts: ["above"], tags: %{ "first" => {:flag, true} } },
-        %Element{ texts: ["top1"], tags: %{ "second" => {:content, %{ texts: ["2nd"], mentions: [] }} }, children: [
-          %Element{ texts: ["inner1"], tags: %{ "third" => {:flag, true} } },
-          %Element{ mentions: [["inner2", "and", "then", "some"]], tags: %{ "fourth" => {:flag, true} } }
+        %Element{ texts: ["above"], tags_path: ["first"], tags_hash: %{ "first" => {:flag, true} } },
+        %Element{ texts: ["top1"], tags_hash: %{ "second" => {:content, %{ texts: ["2nd"], mentions: [] }} }, children: [
+          %Element{ texts: ["inner1"], tags_path: ["third"], tags_hash: %{ "third" => {:flag, true} } },
+          %Element{ mentions: [["inner2", "and", "then", "some"]], tags_path: ["fourth"], tags_hash: %{ "fourth" => {:flag, true} } }
         ] },
-        %Element{ mentions: [["top2"]], tags: %{ "fifth" => {:content, %{ texts: [""], mentions: [["mentioning", "something"]] }} }, children: [
-          %Element{ texts: ["inner3"], tags: %{ "sixth" => {:flag, true} } },
-          %Element{ texts: ["inner4"], tags: %{ "seventh" => {:flag, true} } }
+        %Element{ mentions: [["top2"]], tags_hash: %{ "fifth" => {:content, %{ texts: [""], mentions: [["mentioning", "something"]] }} }, children: [
+          %Element{ texts: ["inner3"], tags_path: ["sixth"], tags_hash: %{ "sixth" => {:flag, true} } },
+          %Element{ texts: ["inner4"], tags_path: ["seventh"], tags_hash: %{ "seventh" => {:flag, true} } }
         ] },
-        %Element{ texts: ["below"], tags: %{ "eighth" => {:flag, true} } }
+        %Element{ texts: ["below"], tags_path: ["eighth"], tags_hash: %{ "eighth" => {:flag, true} } }
       ]
     ]
 
@@ -213,20 +213,20 @@ below #eighth
 """
   ) == [
       [
-        %Element{ texts: ["Name"], tags: %{ "field" => {:flag, true} } },
-        %Element{ texts: ["Password"], tags: %{ "field" => {:flag, true}, "password" => {:flag, true} } }
+        %Element{ texts: ["Name"], tags_path: ["field"], tags_hash: %{ "field" => {:flag, true} } },
+        %Element{ texts: ["Password"], tags_path: ["field", "password"], tags_hash: %{ "field" => {:flag, true}, "password" => {:flag, true} } }
       ],
       [
-        %Element{ texts: ["above"], tags: %{ "first" => {:flag, true} } },
-        %Element{ texts: ["top1"], tags: %{ "second" => {:content, %{ texts: ["2nd"], mentions: [] }} }, children: [
-          %Element{ texts: ["inner1"], tags: %{ "third" => {:flag, true} } },
-          %Element{ mentions: [["inner2", "and", "then", "some"]], tags: %{ "fourth" => {:flag, true} } }
+        %Element{ texts: ["above"], tags_path: ["first"], tags_hash: %{ "first" => {:flag, true} } },
+        %Element{ texts: ["top1"], tags_hash: %{ "second" => {:content, %{ texts: ["2nd"], mentions: [] }} }, children: [
+          %Element{ texts: ["inner1"], tags_path: ["third"], tags_hash: %{ "third" => {:flag, true} } },
+          %Element{ mentions: [["inner2", "and", "then", "some"]], tags_path: ["fourth"], tags_hash: %{ "fourth" => {:flag, true} } }
         ] },
-        %Element{ mentions: [["top2"]], tags: %{ "fifth" => {:content, %{ texts: [""], mentions: [["mentioning", "something"]] }} }, children: [
-          %Element{ texts: ["inner3"], tags: %{ "sixth" => {:flag, true} } },
-          %Element{ texts: ["inner4"], tags: %{ "seventh" => {:flag, true} } }
+        %Element{ mentions: [["top2"]], tags_hash: %{ "fifth" => {:content, %{ texts: [""], mentions: [["mentioning", "something"]] }} }, children: [
+          %Element{ texts: ["inner3"], tags_path: ["sixth"], tags_hash: %{ "sixth" => {:flag, true} } },
+          %Element{ texts: ["inner4"], tags_path: ["seventh"], tags_hash: %{ "seventh" => {:flag, true} } }
         ] },
-        %Element{ texts: ["below"], tags: %{ "eighth" => {:flag, true} } }
+        %Element{ texts: ["below"], tags_path: ["eighth"], tags_hash: %{ "eighth" => {:flag, true} } }
       ]
     ]
   end

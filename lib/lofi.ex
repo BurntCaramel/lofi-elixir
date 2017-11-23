@@ -7,6 +7,6 @@ defmodule Lofi do
     @moduledoc """
     A Lofi element struct, with texts, mentions, tags, children, and optionally, introducing
     """
-    defstruct introducing: nil, texts: [""], mentions: [], tags: %{}, children: []
+    defstruct introducing: nil, texts: [""], mentions: [], tags_path: [], tags_hash: %{}, children: []
   end
 end

@@ -22,14 +22,24 @@ defmodule Lofi.Parse do
     end
   end
 
+  defp fold_tag_into_list({key, {:flag, true}}, tags_list) do
+    [ key | tags_list ]
+  end
+
+  defp fold_tag_into_list(_tag, tags_list), do: tags_list
+
   defp parse_tags(input) do
-    Regex.scan(@tags_regex, input)
+    pairs = Regex.scan(@tags_regex, input)
     |> Enum.map( fn l ->
       l
       |> List.first
       |> parse_tag_key_value
     end)
-    |> Map.new
+    
+    tags_path = List.foldr(pairs, [], &fold_tag_into_list/2)
+    tags_hash = Map.new(pairs)
+
+    {tags_path, tags_hash}
   end
 
   defp parse_mention(input) do
@@ -83,10 +93,10 @@ defmodule Lofi.Parse do
   ## Examples
 
       iex> Lofi.Parse.parse_element("hello")
-      %Lofi.Element{ texts: ["hello"], tags: %{} }
+      %Lofi.Element{ texts: ["hello"], tags_path: [], tags_hash: %{} }
 
       iex> Lofi.Parse.parse_element("Click me #button")
-      %Lofi.Element{ texts: ["Click me"], tags: %{ "button" => {:flag, true} } }
+      %Lofi.Element{ texts: ["Click me"], tags_path: ["button"], tags_hash: %{ "button" => {:flag, true} } }
 
       iex> Lofi.Parse.parse_element("hello @first-name @last-name")
       %Lofi.Element{ texts: ["hello ", " "], mentions: [["first-name"], ["last-name"]] }
@@ -98,8 +108,8 @@ defmodule Lofi.Parse do
       |> parse_introduction
 
     %{ texts: texts, mentions: mentions } = parse_texts_and_mentions(rest)
-    tags = parse_tags(rest)
-    %Lofi.Element{ introducing: introducing, texts: texts, mentions: mentions, tags: tags }
+    {tags_path, tags_hash} = parse_tags(rest)
+    %Lofi.Element{ introducing: introducing, texts: texts, mentions: mentions, tags_path: tags_path, tags_hash: tags_hash }
   end
 
   # Lines are separated by one newline
